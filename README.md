@@ -1,5 +1,7 @@
 ## 位图图像文件缩放
 
+有问题的话可以在提交issue，欢迎关注和Star。
+
 ### 题目要求
 
 编写一个程序，可以在命令行输入参数，完成指定文件的缩放，并存储到新文件，命令行参数如下：
@@ -274,7 +276,3 @@ pSource1和pSource2分别对应于y1,y2高度下的两个位置，q为y1离Y/pzo
 
 放大到原来的1.69倍：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210528184134242.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2FreW5h,size_16,color_FFFFFF,t_70#pic_center)
-
-### 后记
-
-有问题的话可以在github提交issue，欢迎关注和Star。
