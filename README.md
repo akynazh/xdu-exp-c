@@ -1,12 +1,10 @@
 ## 位图图像文件缩放
 
-有问题的话可以在提交issue，欢迎关注和Star。
-
-### 题目要求
+### 题目简介
 
 编写一个程序，可以在命令行输入参数，完成指定文件的缩放，并存储到新文件，命令行参数如下：
 
-**zoom file1.bmp 200 file2.bmp**
+```zoom file1.bmp 200 file2.bmp```
 
 第一个参数为可执行程序名称，第二个参数为原始图像文件名，第三个参数为缩放比例（百分比），第四个参数为新文件名。
 
@@ -14,13 +12,13 @@
 
 由于window上主要是**24位图和256色8位图**居多，所以这里的程序只编写了针对于这两种图片的算法，如果想实现其他位图的缩放，也很简单，只需要在一些位置进行对应的修改。
 
-**算法分析：**
+### 算法分析
 
-**1.最邻近插值算法**
+#### 最邻近插值算法
 
 很简单，就是对新图中的每一个点（X,Y），通过压缩比例pzoom可以对应的找到原图所在点（x,y）的大致位置，然后对应字节拷贝过去即可。
 
-**2.双线性插值算法**
+#### 双线性插值算法
 
 较第一种方法准确一点的算法，大概就是对新图中的每一个点，通过压缩比例pzoom可以对应的找到原图对应的x1,y1，然后可以进一步获得邻近的x2=x1+1和y2=y1+1，由着四个值可以确定4个原图的点。然后根据**权值思想**先进行水平方向的插值找到两个点，后对这两点在竖直方向进行插值即可找到结果，再把对应字节拷贝过去即可。
 
@@ -39,7 +37,7 @@
 
 先单独读取bmp图片文本标识符**0x4d42**,这个只能单独读取，读取文件头时不包含它，应该去掉或者注释掉。如下文件头结构所示：
 
-**文件头：**
+**1.文件头：**
 
 ```c
 typedef struct tagBITMAPFILEHEADER {
@@ -51,7 +49,7 @@ typedef struct tagBITMAPFILEHEADER {
 }BITMAPFILEHEADER;
 ```
 
-**信息头：**
+**2.信息头：**
 
 ```c
 typedef struct tagBITMAPINFOHEADER {
@@ -68,8 +66,7 @@ typedef struct tagBITMAPINFOHEADER {
     unsigned int    biClrImportant;  // 说明对图象显示有重要影响的颜色索引的数目 如果是0表示都重要
 }BITMAPINFOHEADER;
 ```
-
-**调色板：**
+**3.调色板：**
 
 ```c
 typedef struct tagRGBQUAND{
@@ -79,8 +76,9 @@ typedef struct tagRGBQUAND{
 	unsigned char rgbReserved;
 }RGBQUAND;
 ```
+**4.位图数据**
 
-**位图数据**则是一个一个的字节了，无需定义结构体，后面直接读取即可。
+位图数据则是一个一个的字节了，无需定义结构体，后面直接读取即可。
 
 #### 读取图片信息
 
@@ -130,9 +128,7 @@ typedef struct tagRGBQUAND{
 	}
 ```
 
-#### 修改两个header的数据
-
-同时把修改后的header(及调色板信息)写入新图片中
+#### 修改两个header的数据并把修改后的header(及调色板信息)写入新图片中**
 
 ```c
 	//修改两个header的数据并把修改后的header(及调色板信息)写入新图片中 
@@ -180,7 +176,6 @@ typedef struct tagRGBQUAND{
 关键点分析：
 
 对于8位图的算法：
-
 ```c
 *(pDestination + X*byte) = *(pSource1 + x1*byte) * (1-p) * (1-q) +
 					 	  *(pSource1 + x2*byte) * p * (1-q) +
@@ -192,7 +187,6 @@ pSource1和pSource2分别对应于y1,y2高度下的两个位置，q为y1离Y/pzo
 ```*(pSource1+x1*byte) * (1-p)*(1-q) + *(pSource1+x2*byte) * p*(1-q) ```
 同理：对y2高度，在水平方向进行插值：
 ```*(pSource2 + x1*byte) * (1-p) * q +   *(pSource2 + x2*byte) * p * q;```
-
 这两个东西相加就相当于在竖直方向进行插值了！
 
 另外，由于是8位位图，这里byte=1，所以只有一个位置进行插值。
@@ -257,22 +251,28 @@ pSource1和pSource2分别对应于y1,y2高度下的两个位置，q为y1离Y/pzo
 
 ### 效果显示
 
-**24位图缩小：**
+**(1) 24位图缩小：**
 
 缩小到原来的0.66倍
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210528183951844.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2FreW5h,size_16,color_FFFFFF,t_70#pic_center)
-**24位位图放大：**
+**(2) 24位位图放大：**
 
 放大到原来的2.33倍：
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210528184022479.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2FreW5h,size_16,color_FFFFFF,t_70#pic_center)**256色8位位图缩小：**
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210528184022479.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2FreW5h,size_16,color_FFFFFF,t_70#pic_center)**(3) 256色8位位图缩小：**
 
 缩小到原来的一半：
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2021052818420724.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2FreW5h,size_16,color_FFFFFF,t_70#pic_center)
 
-**256色8位位图放大：**
+**(4) 256色8位位图放大：**
 
 放大到原来的1.69倍：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210528184134242.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2FreW5h,size_16,color_FFFFFF,t_70#pic_center)
+### 后记
+解决问题的过程才是真正提升能力的过程。
+
+完整源码详见我的[github](https://github.com/akynazh)。有问题的话可以在github提交issue，欢迎关注我的[github](https://github.com/akynazh)，觉得项目有帮助的可以star。最新文章发布于个人网站[akynazh](https://akynazh.site)。
+
+over
