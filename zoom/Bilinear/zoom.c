@@ -44,13 +44,15 @@ int main(int argc, char* argv[]){
 		if(fp2 == NULL)	fclose(fp2);
 		return -1;
 	}
+	
 	//单独读取bmp图片文本标识符0x4d42
 	unsigned short fileType;
 	fread(&fileType, sizeof(unsigned short), 1, fp1);
 	if(fileType != 0x4d42){//如果不是的话证明不是bmp图片 
-		printf("The photo is not of bmp type！\n");
+		printf("The photo is not of bmp type!\n");
 		return -1;
 	} 
+	
 	//读取原图信息
 	BITMAPFILEHEADER fileHeader;	// 原图文件头
 	BITMAPINFOHEADER infoHeader;	// 原图消息头 
@@ -60,6 +62,7 @@ int main(int argc, char* argv[]){
 	RGBQUAND *palette = (RGBQUAND*)malloc((int)pow(2, infoHeader.biBitCount) * 4);//分配调色板空间 
 	if(infoHeader.biBitCount != 24)//如果是24位图的没有调色板 
 		fread(palette, sizeof(RGBQUAND), (int)pow(2, infoHeader.biBitCount), fp1);
+	
 	//得到原图宽高和修改后的宽高
 	unsigned int oldWidth, oldHeight, newWidth, newHeight;
 	oldWidth = infoHeader.biWidth;
@@ -72,6 +75,7 @@ int main(int argc, char* argv[]){
 	printf("Newphoto's height:%d\n", newHeight);
 	printf("Newphoto's width:%d\n", newWidth);
 	unsigned int oldsize = oldWidth * oldHeight * byte, newsize = newWidth * newHeight * byte;
+		
 	//获取原图位图数据
 	unsigned char *sourceData = (unsigned char*)malloc(oldsize);
 	if(infoHeader.biBitCount == 24){//无调色板时 
@@ -81,6 +85,7 @@ int main(int argc, char* argv[]){
 		fseek(fp1, 1078, SEEK_SET);//文件指针指向文件的第54+2^8*4=1078个字节 
 		fread(sourceData, oldsize, 1, fp1); 
 	}
+	
 	//修改两个header的数据并把修改后的header(及调色板信息)写入新图片中 
 	infoHeader.biWidth = newWidth;
 	infoHeader.biHeight = newHeight;
@@ -95,24 +100,53 @@ int main(int argc, char* argv[]){
 	fwrite(&fileHeader, sizeof(BITMAPFILEHEADER), 1, fp2);
 	fwrite(&infoHeader, sizeof(BITMAPINFOHEADER), 1, fp2);
 	if(infoHeader.biBitCount!=24)	fwrite(palette,sizeof(RGBQUAND),pow(2,infoHeader.biBitCount),fp2);
-	//使用最邻近差值算法进行图片缩放 
-	unsigned int x, y;						//原图所在像素点的宽高
-	unsigned int X, Y; 						//新图所在像素点的宽高 
- 	unsigned char *pDestination; 			//修改像素的位置（即字节偏移量） 
-	unsigned char *pSource;					//获取像素的位置（即字节偏移量） 
-	unsigned char *destinationData = (unsigned char*)malloc(newsize);//开好新图片的位图数据所需空间
+	 
+	//使用双线性差值法进行图片缩放	
+	double p,q;
+	unsigned int x1, y1, x2, y2;				//原图所在像素点的宽高
+	unsigned int X, Y; 			 
+ 	unsigned char *pDestination; 				//修改像素的位置（即字节偏移量） 
+	unsigned char *pSource1,*pSource2;			//获取像素的位置（即字节偏移量）
+	unsigned char *destinationData = (unsigned char*)malloc(newsize);//开好新图片的位图数据所需空间 
 	for(Y = 0; Y < newHeight; Y++){
-		y = Y / pzoom;				
+		y1 = Y / pzoom;
+		y2 = Y / pzoom + 1;
+		q = Y / pzoom - y1;
 		pDestination = destinationData + Y * newWidth * byte;
-		pSource = sourceData + y * oldWidth * byte;
+		pSource1 = sourceData + y1 * oldWidth * byte;
+		pSource2 = sourceData + y2 * oldWidth * byte;
 		for(X = 0; X < newWidth; X++){
- 			x = X / pzoom;
-			memcpy(pDestination + X * byte, pSource + x * byte, byte);
+	 		x1 = X / pzoom;
+	 		x2 = X / pzoom + 1;
+	 		p = X / pzoom - x1;
+	 		if(byte == 3){
+			*(pDestination + X*byte) = *(pSource1 + x1*byte) * (1-p) * (1-q) +
+									   *(pSource1 + x2*byte) * p * (1-q) +
+									   *(pSource2 + x1*byte) * (1-p) * q + 
+									   *(pSource2 + x2*byte) * p * q;
+
+			*(pDestination + X*byte+1) = *(pSource1 + x1*byte+1) * (1-p) * (1-q) + 
+										 *(pSource1 + x2*byte+1) * p * (1-q) + 
+										 *(pSource2 + x1*byte+1) * (1-p) * q + 
+										 *(pSource2 + x2*byte+1) * p * q;
+									 
+			*(pDestination + X*byte+2) =*(pSource1 + x1*byte+2) * (1-p) * (1-q) + 
+									 	*(pSource1 + x2*byte+2) * p * (1-q) + 
+										*(pSource2 + x1*byte+2) * (1-p) * q + 
+										*(pSource2 + x2*byte+2) * p * q;
+			}
+			else if(byte == 1){
+				*(pDestination + X*byte) = *(pSource1 + x1*byte) * (1-p) * (1-q) +
+										   *(pSource1 + x2*byte) * p * (1-q) +
+										   *(pSource2 + x1*byte) * (1-p) * q +
+										   *(pSource2 + x2*byte) * p * q;
+			}
 		}
-	}			
-	//将位图数据写入新的图片并进行后续处理 
+	}	
+
+	//将位图数据写入新的图片并进行后续处理
 	fwrite(destinationData, newsize, 1, fp2);	
-	printf("success！\n");
+	printf("success!\n");
 	free(destinationData);
 	free(sourceData);
 	free(palette);

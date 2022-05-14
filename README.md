@@ -241,7 +241,7 @@ pSource1和pSource2分别对应于y1,y2高度下的两个位置，q为y1离Y/pzo
 
 ```c
 	fwrite(destinationData, newsize, 1, fp2);	
-	printf("success！\n");
+	printf("success!\n");
 	free(destinationData);
 	free(sourceData);
 	free(palette);
