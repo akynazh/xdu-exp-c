@@ -2,7 +2,7 @@
 
 西安电子科技大学C语言实验代码参考：
 
-- [位图图像文件缩放](exp_bitmap_scaling/README.md)
+- [位图图像文件缩放](exp_bitmap_scaling)
   - exp_bitmap_scaling/bmp/**：测试bmp图像结构的代码和用于测试的图片
   - exp_bitmap_scaling/zoom/**：两种缩放图像算法的代码以及用于理解和测试的图片
 - [RLE解压缩算法](exp_rle/README.md)
