@@ -8,11 +8,11 @@
 - [RLE解压缩算法](exp_rle/README.md)
   - [exp_rle/](exp_rle/): 源码以及example子目录下的测试样例
 - [图书管理系统](exp_library/README.md)
-  - [exp_library/](exp_library/): 源码以及文件数据库文件 
+  - [exp_library/](exp_library/): 源码以及文件数据库文件
 
 ## 关于
 
 代码仅供参考，建议先自行思考，有错误可以提issue，欢迎star。
 
 - 作者：Jzh
-- QQ-mail: 1945561232@qq.com 
+- QQ-mail: akynazh@qq.com

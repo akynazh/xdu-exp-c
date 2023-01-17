@@ -1,87 +1,93 @@
-#include<stdio.h>
-#include<malloc.h>
-#include<string.h>
-#pragma pack(1)	// ÈÃ½á¹¹ÌåÖĞ¸÷³ÉÔ±°´1×Ö½Ú¶ÔÆë,·½±ãºóĞòÎÄ¼ş¶ÁĞ´²Ù×÷ 
+#include <malloc.h>
+#include <stdio.h>
+#include <string.h>
+#pragma pack(1)  // è®©ç»“æ„ä½“ä¸­å„æˆå‘˜æŒ‰1å­—èŠ‚å¯¹é½,æ–¹ä¾¿ååºæ–‡ä»¶è¯»å†™æ“ä½œ
 
-//BMPËÄ´ó¼ş: 1.ÎÄ¼şÍ· 2.ÏûÏ¢Í· 3.µ÷É«°å 4.Î»Í¼Êı¾İ 
+// BMPå››å¤§ä»¶: 1.æ–‡ä»¶å¤´ 2.æ¶ˆæ¯å¤´ 3.è°ƒè‰²æ¿ 4.ä½å›¾æ•°æ®
 
-//ÎÄ¼şÍ·
+// æ–‡ä»¶å¤´
 typedef struct tagBITMAPFILEHEADER {
-	//unsigned short bfType;	  // ±£´æÍ¼Æ¬ÀàĞÍ£¬¶ÁÈ¡Ê±ĞèÒªÏÈ×¢ÊÍµô£¬ÎÄ±¾±êÊ¶·ûÖ»ÄÜµ¥¶À½øĞĞ¶ÁĞ´
-    unsigned int   bfSize;        // ÎÄ¼ş´óĞ¡
-    unsigned short bfReserved1;   // ±£Áô£¬ÉèÖÃÎª0
-    unsigned short bfReserved2;   // ±£Áô£¬ÉèÖÃÎª0
-    unsigned int   bfOffBits;     // ´ÓÎÄ¼şÍ·µ½Êµ¼ÊµÄÍ¼ÏñÊı¾İÖ®¼äµÄ×Ö½ÚµÄÆ«ÒÆÁ¿
-}BITMAPFILEHEADER;
-//ĞÅÏ¢Í·
+    // unsigned short bfType;	  //
+    // ä¿å­˜å›¾ç‰‡ç±»å‹ï¼Œè¯»å–æ—¶éœ€è¦å…ˆæ³¨é‡Šæ‰ï¼Œæ–‡æœ¬æ ‡è¯†ç¬¦åªèƒ½å•ç‹¬è¿›è¡Œè¯»å†™
+    unsigned int bfSize;         // æ–‡ä»¶å¤§å°
+    unsigned short bfReserved1;  // ä¿ç•™ï¼Œè®¾ç½®ä¸º0
+    unsigned short bfReserved2;  // ä¿ç•™ï¼Œè®¾ç½®ä¸º0
+    unsigned int bfOffBits;  // ä»æ–‡ä»¶å¤´åˆ°å®é™…çš„å›¾åƒæ•°æ®ä¹‹é—´çš„å­—èŠ‚çš„åç§»é‡
+} BITMAPFILEHEADER;
+// ä¿¡æ¯å¤´
 typedef struct tagBITMAPINFOHEADER {
-    unsigned int    biSize;          // ´Ë½á¹¹ÌåµÄ´óĞ¡
-    unsigned int    biWidth;         // Í¼ÏñµÄ¿í
-    unsigned int    biHeight;        // Í¼ÏñµÄ¸ß
-    unsigned short  biPlanes;        // ÑÕÉ«Æ½ÃæÊı ºãÎª1
-    unsigned short  biBitCount;      // Ò»ÏñËØËùÕ¼µÄÎ»Êı Ò»°ãÎª24
-    unsigned int    biCompression;   // ËµÃ÷Í¼ÏóÊı¾İÑ¹ËõµÄÀàĞÍ£¬0Îª²»Ñ¹Ëõ
-    unsigned int    biSizeImage;     // Í¼Ïñ´óĞ¡, ÖµµÈÓÚÉÏÃæÎÄ¼şÍ·½á¹¹ÖĞbfSize-bfOffBits
-    int             biXPelsPerMeter; // ËµÃ÷Ë®Æ½·Ö±æÂÊ£¬ÓÃÏñËØ/Ã×±íÊ¾ Ò»°ãÎª0 
-    int             biYPelsPerMeter; // ËµÃ÷´¹Ö±·Ö±æÂÊ£¬ÓÃÏñËØ/Ã×±íÊ¾ Ò»°ãÎª0 
-    unsigned int    biClrUsed;       // ËµÃ÷Î»Í¼Êµ¼ÊÊ¹ÓÃµÄ²ÊÉ«±íÖĞµÄÑÕÉ«Ë÷ÒıÊı£¨ÉèÎª0µÄ»°£¬ÔòËµÃ÷Ê¹ÓÃËùÓĞµ÷É«°åÏî£©
-    unsigned int    biClrImportant;  // ËµÃ÷¶ÔÍ¼ÏóÏÔÊ¾ÓĞÖØÒªÓ°ÏìµÄÑÕÉ«Ë÷ÒıµÄÊıÄ¿ Èç¹ûÊÇ0±íÊ¾¶¼ÖØÒª
-}BITMAPINFOHEADER;
-//µ÷É«°å[¹²256(==2^8)ÖÖË÷ÒıÑÕÉ«£¬8Î»ÒÔÉÏµÄ¿ÉÒÔÃ»ÓĞµ÷É«°å]
+    unsigned int biSize;        // æ­¤ç»“æ„ä½“çš„å¤§å°
+    unsigned int biWidth;       // å›¾åƒçš„å®½
+    unsigned int biHeight;      // å›¾åƒçš„é«˜
+    unsigned short biPlanes;    // é¢œè‰²å¹³é¢æ•° æ’ä¸º1
+    unsigned short biBitCount;  // ä¸€åƒç´ æ‰€å çš„ä½æ•° ä¸€èˆ¬ä¸º24
+    unsigned int biCompression;  // è¯´æ˜å›¾è±¡æ•°æ®å‹ç¼©çš„ç±»å‹ï¼Œ0ä¸ºä¸å‹ç¼©
+    unsigned int
+        biSizeImage;  // å›¾åƒå¤§å°, å€¼ç­‰äºä¸Šé¢æ–‡ä»¶å¤´ç»“æ„ä¸­bfSize-bfOffBits
+    int biXPelsPerMeter;  // è¯´æ˜æ°´å¹³åˆ†è¾¨ç‡ï¼Œç”¨åƒç´ /ç±³è¡¨ç¤º ä¸€èˆ¬ä¸º0
+    int biYPelsPerMeter;  // è¯´æ˜å‚ç›´åˆ†è¾¨ç‡ï¼Œç”¨åƒç´ /ç±³è¡¨ç¤º ä¸€èˆ¬ä¸º0
+    unsigned int
+        biClrUsed;  // è¯´æ˜ä½å›¾å®é™…ä½¿ç”¨çš„å½©è‰²è¡¨ä¸­çš„é¢œè‰²ç´¢å¼•æ•°ï¼ˆè®¾ä¸º0çš„è¯ï¼Œåˆ™è¯´æ˜ä½¿ç”¨æ‰€æœ‰è°ƒè‰²æ¿é¡¹ï¼‰
+    unsigned int biClrImportant;  // è¯´æ˜å¯¹å›¾è±¡æ˜¾ç¤ºæœ‰é‡è¦å½±å“çš„é¢œè‰²ç´¢å¼•çš„æ•°ç›®
+                                  // å¦‚æœæ˜¯0è¡¨ç¤ºéƒ½é‡è¦
+} BITMAPINFOHEADER;
+// è°ƒè‰²æ¿[å…±256(==2^8)ç§ç´¢å¼•é¢œè‰²ï¼Œ8ä½ä»¥ä¸Šçš„å¯ä»¥æ²¡æœ‰è°ƒè‰²æ¿]
 struct PixelInfo {
-    unsigned char rgbBlue;     //¸ÃÑÕÉ«µÄÀ¶É«·ÖÁ¿  (Öµ·¶Î§Îª0-255)
-    unsigned char rgbGreen;    //¸ÃÑÕÉ«µÄÂÌÉ«·ÖÁ¿  (Öµ·¶Î§Îª0-255)
-    unsigned char rgbRed;      //¸ÃÑÕÉ«µÄºìÉ«·ÖÁ¿  (Öµ·¶Î§Îª0-255)
-    unsigned char rgbReserved; // ±£Áô£¬±ØĞëÎª0
+    unsigned char rgbBlue;      // è¯¥é¢œè‰²çš„è“è‰²åˆ†é‡  (å€¼èŒƒå›´ä¸º0-255)
+    unsigned char rgbGreen;     // è¯¥é¢œè‰²çš„ç»¿è‰²åˆ†é‡  (å€¼èŒƒå›´ä¸º0-255)
+    unsigned char rgbRed;       // è¯¥é¢œè‰²çš„çº¢è‰²åˆ†é‡  (å€¼èŒƒå›´ä¸º0-255)
+    unsigned char rgbReserved;  // ä¿ç•™ï¼Œå¿…é¡»ä¸º0
 };
 BITMAPFILEHEADER fileHeader;
 BITMAPINFOHEADER infoHeader;
 
-//ÏÔÊ¾bmpÍ¼Æ¬ÎÄ¼şÍ·ÄÚÈİ 
-void showBmpHead(BITMAPFILEHEADER pBmpHead)
-{  
-	//printf("ÎÄ¼ş±êÊ¶·û£º%x\n", fileHeader.bfType);
-	printf("BMPÎÄ¼ş´óĞ¡£º%dkb\n", fileHeader.bfSize);
-	printf("±£Áô×Ö±ØĞëÎª0£º%d\n", fileHeader.bfReserved1);
-	printf("±£Áô×Ö±ØĞëÎª0£º%d\n", fileHeader.bfReserved2);
-	printf("Êµ¼ÊÎ»Í¼Êı¾İµÄÆ«ÒÆ×Ö½ÚÊı: %d\n", fileHeader.bfOffBits);
+// æ˜¾ç¤ºbmpå›¾ç‰‡æ–‡ä»¶å¤´å†…å®¹
+void showBmpHead(BITMAPFILEHEADER pBmpHead) {
+    // printf("æ–‡ä»¶æ ‡è¯†ç¬¦ï¼š%x\n", fileHeader.bfType);
+    printf("BMPæ–‡ä»¶å¤§å°ï¼š%dkb\n", fileHeader.bfSize);
+    printf("ä¿ç•™å­—å¿…é¡»ä¸º0ï¼š%d\n", fileHeader.bfReserved1);
+    printf("ä¿ç•™å­—å¿…é¡»ä¸º0ï¼š%d\n", fileHeader.bfReserved2);
+    printf("å®é™…ä½å›¾æ•°æ®çš„åç§»å­—èŠ‚æ•°: %d\n", fileHeader.bfOffBits);
 }
-//ÏÔÊ¾bmpÍ¼Æ¬Î»Í¼ĞÅÏ¢Í·ÄÚÈİ 
-void showBmpInfoHead(BITMAPINFOHEADER pBmpinfoHead)
-{
-	printf("Î»Í¼ĞÅÏ¢Í·:\n");
-	printf("ĞÅÏ¢Í·µÄ´óĞ¡:%d\n", infoHeader.biSize);
-	printf("Î»Í¼¿í¶È:%d\n", infoHeader.biWidth);
-	printf("Î»Í¼¸ß¶È:%d\n", infoHeader.biHeight);
-	printf("Í¼ÏñµÄÎ»ÃæÊı(Î»ÃæÊıÊÇµ÷É«°åµÄÊıÁ¿,Ä¬ÈÏÎª1¸öµ÷É«°å):%d\n", infoHeader.biPlanes);
-	printf("Ã¿¸öÏñËØµÄÎ»Êı:%d\n", infoHeader.biBitCount);
-	printf("Ñ¹Ëõ·½Ê½:%d\n", infoHeader.biCompression);
-	printf("Í¼ÏñµÄ´óĞ¡:%d\n", infoHeader.biSizeImage);
-	printf("Ë®Æ½·½Ïò·Ö±æÂÊ:%d\n", infoHeader.biXPelsPerMeter);
-	printf("´¹Ö±·½Ïò·Ö±æÂÊ:%d\n", infoHeader.biYPelsPerMeter);
-	printf("Ê¹ÓÃµÄÑÕÉ«Êı:%d\n", infoHeader.biClrUsed);
-	printf("ÖØÒªÑÕÉ«Êı:%d\n", infoHeader.biClrImportant);
+// æ˜¾ç¤ºbmpå›¾ç‰‡ä½å›¾ä¿¡æ¯å¤´å†…å®¹
+void showBmpInfoHead(BITMAPINFOHEADER pBmpinfoHead) {
+    printf("ä½å›¾ä¿¡æ¯å¤´:\n");
+    printf("ä¿¡æ¯å¤´çš„å¤§å°:%d\n", infoHeader.biSize);
+    printf("ä½å›¾å®½åº¦:%d\n", infoHeader.biWidth);
+    printf("ä½å›¾é«˜åº¦:%d\n", infoHeader.biHeight);
+    printf("å›¾åƒçš„ä½é¢æ•°(ä½é¢æ•°æ˜¯è°ƒè‰²æ¿çš„æ•°é‡,é»˜è®¤ä¸º1ä¸ªè°ƒè‰²æ¿):%d\n",
+           infoHeader.biPlanes);
+    printf("æ¯ä¸ªåƒç´ çš„ä½æ•°:%d\n", infoHeader.biBitCount);
+    printf("å‹ç¼©æ–¹å¼:%d\n", infoHeader.biCompression);
+    printf("å›¾åƒçš„å¤§å°:%d\n", infoHeader.biSizeImage);
+    printf("æ°´å¹³æ–¹å‘åˆ†è¾¨ç‡:%d\n", infoHeader.biXPelsPerMeter);
+    printf("å‚ç›´æ–¹å‘åˆ†è¾¨ç‡:%d\n", infoHeader.biYPelsPerMeter);
+    printf("ä½¿ç”¨çš„é¢œè‰²æ•°:%d\n", infoHeader.biClrUsed);
+    printf("é‡è¦é¢œè‰²æ•°:%d\n", infoHeader.biClrImportant);
 }
-int main(int agrc, char *argv[]) {
-	FILE* fp;
-	unsigned short fileType;
-	fp = fopen("zh.bmp", "rb");
-	if (fp == NULL) {
-		printf("´ò¿ªÍ¼Æ¬'img.bmp'Ê§°Ü!\n");
-		return -1;
-	}
-	fread(&fileType, sizeof(unsigned short), 1, fp);
-	//42 4d : 4d42 : 19778
-	//e6 1e 04 00 : 00041ee6 : 270054×Ö½Ú 
-	if (fileType == 0x4d42)//bfType,Í¼Æ¬µÄÀàĞÍ,±ØĞëÊÇBMP, 0x4d42(¼´Ê®½øÖÆµÄ19778) 
-	{
-		printf("ÎÄ¼şÀàĞÍ±êÊ¶ÕıÈ·!");
-		printf("\nÎÄ¼ş±êÊ¶·û£º%x\n", fileType);
-		fread(&fileHeader, sizeof(BITMAPFILEHEADER), 1, fp);
-		showBmpHead(fileHeader);
-		fread(&infoHeader, sizeof(BITMAPINFOHEADER), 1, fp);
-		showBmpInfoHead(infoHeader);
-		fclose(fp); 
-	}
-	return 0;
+// è¿è¡Œæ–¹æ³•ï¼š./bmp test.bmp
+int main(int agrc, char* argv[]) {
+    FILE* fp;
+    unsigned short fileType;
+    printf("%s", argv[1]);
+    fp = fopen(argv[1], "rb");
+    if (fp == NULL) {
+        printf("æ‰“å¼€å›¾ç‰‡'%s'å¤±è´¥!\n", argv[1]);
+        return -1;
+    }
+    fread(&fileType, sizeof(unsigned short), 1, fp);
+    // 42 4d : 4d42 : 19778
+    // e6 1e 04 00 : 00041ee6 : 270054å­—èŠ‚
+    if (fileType ==
+        0x4d42)  // bfType,å›¾ç‰‡çš„ç±»å‹,å¿…é¡»æ˜¯BMP, 0x4d42(å³åè¿›åˆ¶çš„19778)
+    {
+        printf("æ–‡ä»¶ç±»å‹æ ‡è¯†æ­£ç¡®!");
+        printf("\næ–‡ä»¶æ ‡è¯†ç¬¦ï¼š%x\n", fileType);
+        fread(&fileHeader, sizeof(BITMAPFILEHEADER), 1, fp);
+        showBmpHead(fileHeader);
+        fread(&infoHeader, sizeof(BITMAPINFOHEADER), 1, fp);
+        showBmpInfoHead(infoHeader);
+        fclose(fp);
+    }
+    return 0;
 }
