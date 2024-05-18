@@ -14,5 +14,4 @@
 
 代码仅供参考，建议先自行思考，有错误可以提issue，欢迎star。
 
-- 作者：Jzh
-- QQ-mail: akynazh@qq.com
+联系: akynazh@gmail.com
